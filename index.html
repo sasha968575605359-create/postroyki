@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Subsistence Architect - Твои задания</title>
+    <style>
+        body { background: #1a1a1a; color: #e0e0e0; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 80%; max-width: 600px; text-align: center; }
+        input { width: 80%; padding: 12px; border-radius: 5px; border: none; margin-bottom: 10px; }
+        button { padding: 12px 25px; background: #4a7c44; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #5da355; }
+        .result { margin-top: 30px; display: none; text-align: left; background: #333; padding: 20px; border-radius: 10px; }
+        .resources { color: #ffcc00; font-family: monospace; }
+        img { width: 100%; border-radius: 10px; margin-top: 15px; border: 2px solid #4a7c44; }
+    </style>
+</head>
+<body>
+
+    <h1>🔨 Subsistence Blueprint Generator</h1>
+    
+    <div class="container">
+        <p>Что планируешь строить?</p>
+        <input type="text" id="goal" placeholder="Например: Башня 3 этажа с бойницами">
+        <br>
+        <button onclick="generateQuest()">Сгенерировать задание</button>
+
+        <div id="resultBox" class="result">
+            <h3 id="resTitle"></h3>
+            <p><strong>📜 Список ресурсов для сбора:</strong></p>
+            <ul id="resList" class="resources"></ul>
+            <p><strong>🗺️ Ориентировочный вид:</strong></p>
+            <div id="imagePlaceholder"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateQuest() {
+            const goal = document.getElementById('goal').value;
+            if (!goal) return alert("Введи хоть что-нибудь!");
+
+            // Логика расчета ресурсов (примерная для Subsistence)
+            let planks = Math.floor(Math.random() * 100) + 50;
+            let nails = Math.floor(planks / 2);
+            let iron = Math.floor(planks / 10);
+
+            if(goal.includes("3 этажа") || goal.includes("башня")) {
+                planks += 150; nails += 80; iron += 20;
+            }
+
+            document.getElementById('resTitle').innerText = "Задание: " + goal;
+            document.getElementById('resList').innerHTML = `
+                <li>🌲 Доски: ${planks} шт.</li>
+                <li>🔩 Гвозди: ${nails} шт.</li>
+                <li>⛓️ Железо: ${iron} шт.</li>
+                <li>🔌 BCU: 1 шт.</li>
+            `;
+
+            // Здесь в будущем будет API генерации картинок
+            document.getElementById('imagePlaceholder').innerHTML = `<p style="color:gray; font-size: 12px;">[Картинка генерируется нейронкой...]</p>`;
+            
+            document.getElementById('resultBox').style.display = "block";
+        }
+    </script>
+</body>
+</html>
