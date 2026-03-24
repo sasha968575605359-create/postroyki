@@ -2,64 +2,163 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Subsistence Architect - Твои задания</title>
+    <title>BCU TERMINAL v66.15 - SURK OS</title>
     <style>
-        body { background: #1a1a1a; color: #e0e0e0; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 80%; max-width: 600px; text-align: center; }
-        input { width: 80%; padding: 12px; border-radius: 5px; border: none; margin-bottom: 10px; }
-        button { padding: 12px 25px; background: #4a7c44; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #5da355; }
-        .result { margin-top: 30px; display: none; text-align: left; background: #333; padding: 20px; border-radius: 10px; }
-        .resources { color: #ffcc00; font-family: monospace; }
-        img { width: 100%; border-radius: 10px; margin-top: 15px; border: 2px solid #4a7c44; }
+        body { 
+            background: #050805; 
+            color: #33ff33; 
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; justify-content: center; padding: 40px;
+            overflow: hidden;
+        }
+
+        /* Эффект старого ЭЛТ монитора */
+        .screen-fx {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        .container { 
+            background: rgba(10, 20, 10, 0.9); 
+            padding: 25px; border: 2px solid #1a5a1a;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2), 0 0 40px rgba(0, 0, 0, 1);
+            width: 500px; position: relative;
+        }
+
+        .header-stats {
+            display: flex; justify-content: space-between;
+            border-bottom: 2px solid #1a5a1a; padding-bottom: 10px; margin-bottom: 15px;
+            font-size: 12px; color: #4eff4e;
+        }
+
+        h1 { font-size: 18px; text-align: center; margin: 10px 0; letter-spacing: 4px; border: 1px solid #1a5a1a; padding: 5px; }
+
+        .warning-flash {
+            color: #ff3333; text-align: center; font-weight: bold;
+            animation: blink 1s infinite; margin: 10px 0; font-size: 13px;
+        }
+
+        @keyframes blink { 0% {opacity: 0;} 50% {opacity: 1;} 100% {opacity: 0;} }
+
+        .task-item { 
+            background: rgba(0, 50, 0, 0.1); margin: 10px 0; padding: 12px; 
+            border: 1px solid #1a4a1a; display: flex; align-items: center;
+        }
+
+        .task-item:hover { border-color: #33ff33; background: rgba(0, 255, 0, 0.05); }
+
+        input[type="checkbox"] { transform: scale(1.4); margin-right: 15px; accent-color: #33ff33; cursor: pointer; }
+
+        .strikethrough { text-decoration: line-through; color: #004400; }
+
+        button { 
+            width: 100%; padding: 15px; background: #0a2a0a; border: 1px solid #33ff33;
+            color: #33ff33; font-family: inherit; cursor: pointer; font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover { background: #33ff33; color: #000; box-shadow: 0 0 15px #33ff33; }
+
+        .log-window {
+            margin-top: 20px; height: 60px; background: #000; border: 1px solid #1a5a1a;
+            padding: 8px; font-size: 10px; color: #1a8a1a; overflow: hidden;
+        }
+
+        .scanline {
+            width: 100%; height: 100px; background: linear-gradient(0deg, rgba(0,255,0,0) 0%, rgba(0,255,0,0.1) 50%, rgba(0,255,0,0) 100%);
+            position: absolute; top: -100px; animation: scan 4s linear infinite; pointer-events: none;
+        }
+
+        @keyframes scan { 0% { top: -100px; } 100% { top: 100%; } }
     </style>
 </head>
 <body>
 
-    <h1>🔨 Subsistence Blueprint Generator</h1>
-    
-    <div class="container">
-        <p>Что планируешь строить?</p>
-        <input type="text" id="goal" placeholder="Например: Башня 3 этажа с бойницами">
-        <br>
-        <button onclick="generateQuest()">Сгенерировать задание</button>
+<div class="screen-fx"></div>
+<audio id="clickSound" src="https://www.soundjay.com/buttons/button-16.mp3"></audio>
+<audio id="errorSound" src="https://www.soundjay.com/buttons/beep-10.mp3"></audio>
 
-        <div id="resultBox" class="result">
-            <h3 id="resTitle"></h3>
-            <p><strong>📜 Список ресурсов для сбора:</strong></p>
-            <ul id="resList" class="resources"></ul>
-            <p><strong>🗺️ Ориентировочный вид:</strong></p>
-            <div id="imagePlaceholder"></div>
-        </div>
+<div class="container">
+    <div class="scanline"></div>
+    <div class="header-stats">
+        <span>POWER: <span id="pwr">42.1</span> Wh</span>
+        <span>MASS: <span id="mss">18.5</span></span>
+        <span>CPU: STABLE</span>
     </div>
 
-    <script>
-        function generateQuest() {
-            const goal = document.getElementById('goal').value;
-            if (!goal) return alert("Введи хоть что-нибудь!");
+    <h1>SURK-BCU MONITOR</h1>
+    
+    <div class="warning-flash" id="warn">-- SCANNING FOR THREATS --</div>
+    
+    <ul id="taskList" style="list-style: none; padding: 0;"></ul>
+    
+    <button id="syncBtn">СИНХРОНИЗИРОВАТЬ ДАННЫЕ</button>
 
-            // Логика расчета ресурсов (примерная для Subsistence)
-            let planks = Math.floor(Math.random() * 100) + 50;
-            let nails = Math.floor(planks / 2);
-            let iron = Math.floor(planks / 10);
+    <div class="log-window" id="log">
+        [SYSTEM]: Инициализация протокола выживания...<br>
+        [INFO]: База обнаружена в секторе "Пляж".
+    </div>
+</div>
 
-            if(goal.includes("3 этажа") || goal.includes("башня")) {
-                planks += 150; nails += 80; iron += 20;
-            }
+<script>
+    const tasks = [
+        "Найти последний металлолом (Scrap Metal)", "Воткнуть BCU на стену", "Врубить сложность 'Нормал'",
+        "Сделать 10 стрел", "Завалить волка", "Собрать 5 водорослей", "Поставить 2-й этаж",
+        "Найти сундук охотников", "Скрафтить костер", "Добыть 2 хлопка", "Скрафтить грядку",
+        "Установить турель", "Найти 1 личинку для рыбалки", "Улучшить стену до камня"
+    ];
 
-            document.getElementById('resTitle').innerText = "Задание: " + goal;
-            document.getElementById('resList').innerHTML = `
-                <li>🌲 Доски: ${planks} шт.</li>
-                <li>🔩 Гвозди: ${nails} шт.</li>
-                <li>⛓️ Железо: ${iron} шт.</li>
-                <li>🔌 BCU: 1 шт.</li>
-            `;
+    const logs = [
+        "[WARN]: Обнаружена активность охотников в 200м", "[INFO]: Энергия BCU растет: +0.01",
+        "[ENV]: Температура падает: -2°C", "[INFO]: Целостность фундамента 100%",
+        "[WARN]: Голод! Проверьте запасы еды", "[INFO]: Металлолом обнаружен поблизости (вероятно)"
+    ];
 
-            // Здесь в будущем будет API генерации картинок
-            document.getElementById('imagePlaceholder').innerHTML = `<p style="color:gray; font-size: 12px;">[Картинка генерируется нейронкой...]</p>`;
-            
-            document.getElementById('resultBox').style.display = "block";
+    function updateStats() {
+        document.getElementById('pwr').innerText = (Math.random() * 100).toFixed(1);
+        document.getElementById('mss').innerText = (Math.random() * 50).toFixed(1);
+    }
+
+    function addLog() {
+        const logWin = document.getElementById('log');
+        const entry = logs[Math.floor(Math.random() * logs.length)];
+        logWin.innerHTML = entry + "<br>" + logWin.innerHTML.substring(0, 100);
+        
+        // Шанс показать тревогу
+        document.getElementById('warn').innerText = Math.random() > 0.7 ? "!! HUNTER ACTIVITY DETECTED !!" : "-- REGION CLEAR --";
+        document.getElementById('warn').style.color = document.getElementById('warn').innerText.includes("!!") ? "#ff3333" : "#33ff33";
+    }
+
+    function renderTasks() {
+        const list = document.getElementById('taskList');
+        list.innerHTML = "";
+        let shuffled = tasks.sort(() => 0.5 - Math.random()).slice(0, 4);
+        shuffled.forEach(t => {
+            const li = document.createElement('li');
+            li.className = 'task-item';
+            li.innerHTML = `<input type="checkbox"><span>${t}</span>`;
+            list.appendChild(li);
+        });
+    }
+
+    document.getElementById('syncBtn').onclick = () => {
+        const checked = document.querySelectorAll('input:checked').length;
+        if(checked > 0) {
+            document.getElementById('clickSound').play();
+            renderTasks();
+        } else {
+            document.getElementById('errorSound').play();
+            alert("Сначала выполни хотя бы одно задание, боец!");
         }
-    </script>
+    };
+
+    setInterval(updateStats, 3000);
+    setInterval(addLog, 5000);
+    renderTasks();
+</script>
+
 </body>
 </html>
