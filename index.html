@@ -2,49 +2,67 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>BCU TERMINAL v66.15 - SURK OS</title>
+    <title>BCU TERMINAL v66.15 - COASTAL SECTOR - SURK OS</title>
     <style>
         body { 
-            background: #050805; 
+            /* ФОНОВОЕ ИЗОБРАЖЕНИЕ: Стилизованный пляж, море, лес и лагерь охотников вдалеке */
+            background: 
+                linear-gradient(rgba(10, 20, 10, 0.4), rgba(5, 10, 5, 0.8)), /* Зеленый фильтр поверх всего */
+                url('https://i.imgur.com/8vWJ5rD.png') no-repeat center center fixed; /* Ссылка на атмосферный фон (замени на свою, если есть) */
+            background-size: cover;
             color: #33ff33; 
             font-family: 'Courier New', Courier, monospace; 
-            display: flex; justify-content: center; padding: 40px;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 0;
             overflow: hidden;
         }
 
-        /* Эффект старого ЭЛТ монитора */
+        /* Декоративные Ящики на фоне */
+        body::after {
+            content: "";
+            position: absolute; bottom: 50px; right: 50px;
+            width: 150px; height: 100px;
+            background: 
+                url('https://i.imgur.com/K4gRzU3.png') no-repeat center/contain, /* Спрайт Синего ящика */
+                url('https://i.imgur.com/mU4Jv4C.png') no-repeat left/50px; /* Спрайт Серого ящика */
+            opacity: 0.3; z-index: 0; pointer-events: none;
+        }
+
+        /* Эффект старого ЭЛТ монитора (сетка) */
         .screen-fx {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none; z-index: 10;
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none; z-index: 10; opacity: 0.2;
         }
 
+        /* Прозрачный Терминал BCU */
         .container { 
-            background: rgba(10, 20, 10, 0.9); 
+            background: rgba(10, 25, 10, 0.85); /* Полупрозрачный зеленый фон */
             padding: 25px; border: 2px solid #1a5a1a;
-            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2), 0 0 40px rgba(0, 0, 0, 1);
-            width: 500px; position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 50px rgba(0, 0, 0, 0.8);
+            width: 500px; position: relative; z-index: 1; backdrop-filter: blur(2px); /* Легкое размытие фона за терминалом */
         }
 
         .header-stats {
             display: flex; justify-content: space-between;
             border-bottom: 2px solid #1a5a1a; padding-bottom: 10px; margin-bottom: 15px;
-            font-size: 12px; color: #4eff4e;
+            font-size: 11px; color: #4eff4e; text-transform: uppercase;
         }
 
-        h1 { font-size: 18px; text-align: center; margin: 10px 0; letter-spacing: 4px; border: 1px solid #1a5a1a; padding: 5px; }
+        h1 { font-size: 18px; text-align: center; margin: 10px 0; letter-spacing: 4px; border: 1px solid #1a5a1a; padding: 5px; background: rgba(0, 30, 0, 0.5); }
 
         .warning-flash {
             color: #ff3333; text-align: center; font-weight: bold;
-            animation: blink 1s infinite; margin: 10px 0; font-size: 13px;
+            animation: blink 1s infinite; margin: 10px 0; font-size: 13px; min-height: 1.2em;
         }
 
         @keyframes blink { 0% {opacity: 0;} 50% {opacity: 1;} 100% {opacity: 0;} }
 
+        .task-list { list-style: none; padding: 0; margin: 0; }
+
         .task-item { 
-            background: rgba(0, 50, 0, 0.1); margin: 10px 0; padding: 12px; 
+            background: rgba(0, 50, 0, 0.05); margin: 8px 0; padding: 12px; 
             border: 1px solid #1a4a1a; display: flex; align-items: center;
         }
 
@@ -52,24 +70,24 @@
 
         input[type="checkbox"] { transform: scale(1.4); margin-right: 15px; accent-color: #33ff33; cursor: pointer; }
 
-        .strikethrough { text-decoration: line-through; color: #004400; }
+        .strikethrough { text-decoration: line-through; color: #004400; text-shadow: none; }
 
         button { 
-            width: 100%; padding: 15px; background: #0a2a0a; border: 1px solid #33ff33;
+            width: 100%; padding: 15px; background: rgba(10, 40, 10, 0.9); border: 1px solid #33ff33;
             color: #33ff33; font-family: inherit; cursor: pointer; font-weight: bold;
-            transition: 0.2s;
+            transition: 0.2s; text-transform: uppercase;
         }
 
         button:hover { background: #33ff33; color: #000; box-shadow: 0 0 15px #33ff33; }
 
         .log-window {
-            margin-top: 20px; height: 60px; background: #000; border: 1px solid #1a5a1a;
+            margin-top: 20px; height: 60px; background: rgba(0, 0, 0, 0.7); border: 1px solid #1a5a1a;
             padding: 8px; font-size: 10px; color: #1a8a1a; overflow: hidden;
         }
 
         .scanline {
-            width: 100%; height: 100px; background: linear-gradient(0deg, rgba(0,255,0,0) 0%, rgba(0,255,0,0.1) 50%, rgba(0,255,0,0) 100%);
-            position: absolute; top: -100px; animation: scan 4s linear infinite; pointer-events: none;
+            width: 100%; height: 100px; background: linear-gradient(0deg, rgba(0,255,0,0) 0%, rgba(0,255,0,0.05) 50%, rgba(0,255,0,0) 100%);
+            position: absolute; top: -100px; animation: scan 6s linear infinite; pointer-events: none;
         }
 
         @keyframes scan { 0% { top: -100px; } 100% { top: 100%; } }
@@ -78,58 +96,68 @@
 <body>
 
 <div class="screen-fx"></div>
-<audio id="clickSound" src="https://www.soundjay.com/buttons/button-16.mp3"></audio>
-<audio id="errorSound" src="https://www.soundjay.com/buttons/beep-10.mp3"></audio>
+<audio id="clickSound" src="https://www.soundjay.com/buttons/button-16.mp3" preload="auto"></audio>
+<audio id="errorSound" src="https://www.soundjay.com/buttons/beep-10.mp3" preload="auto"></audio>
 
 <div class="container">
     <div class="scanline"></div>
     <div class="header-stats">
-        <span>POWER: <span id="pwr">42.1</span> Wh</span>
-        <span>MASS: <span id="mss">18.5</span></span>
-        <span>CPU: STABLE</span>
+        <span>PWR: <span id="pwr">--.-</span> Wh</span>
+        <span>MSS: <span id="mss">--.-</span></span>
+        <span>NET: COASTAL_NET_01</span>
     </div>
 
-    <h1>SURK-BCU MONITOR</h1>
+    <h1>BCU::SURK_INT_07</h1>
     
-    <div class="warning-flash" id="warn">-- SCANNING FOR THREATS --</div>
+    <div class="warning-flash" id="warn">-- INITIALIZING SYSTEM --</div>
     
-    <ul id="taskList" style="list-style: none; padding: 0;"></ul>
+    <ul id="taskList" class="task-list"></ul>
     
-    <button id="syncBtn">СИНХРОНИЗИРОВАТЬ ДАННЫЕ</button>
+    <button id="syncBtn">СИНХРОНИЗИРОВАТЬ ПРОТОКОЛЫ</button>
 
     <div class="log-window" id="log">
-        [SYSTEM]: Инициализация протокола выживания...<br>
-        [INFO]: База обнаружена в секторе "Пляж".
+        [SYSTEM]: Холодный старт BCU терминала...<br>
+        [INFO]: Сектор "Пляж" активен.
     </div>
 </div>
 
 <script>
+    // Твой расширенный список заданий (Normal режим)
     const tasks = [
-        "Найти последний металлолом (Scrap Metal)", "Воткнуть BCU на стену", "Врубить сложность 'Нормал'",
-        "Сделать 10 стрел", "Завалить волка", "Собрать 5 водорослей", "Поставить 2-й этаж",
+        "Найти 1 металлолом (Scrap Metal)", "Воткнуть BCU на стену", "Врубить сложность 'Нормал'",
+        "Сделать 10 стрел", "Завалить волка", "Собрать 5 водорослей", "Установить 2-й этаж",
         "Найти сундук охотников", "Скрафтить костер", "Добыть 2 хлопка", "Скрафтить грядку",
-        "Установить турель", "Найти 1 личинку для рыбалки", "Улучшить стену до камня"
+        "Установить турель", "Найти 1 личинку для рыбалки", "Улучшить стену до камня",
+        "Собрать 10 камней для фундамента", "Скрафтить верстак (Workbench)"
     ];
 
     const logs = [
-        "[WARN]: Обнаружена активность охотников в 200м", "[INFO]: Энергия BCU растет: +0.01",
-        "[ENV]: Температура падает: -2°C", "[INFO]: Целостность фундамента 100%",
-        "[WARN]: Голод! Проверьте запасы еды", "[INFO]: Металлолом обнаружен поблизости (вероятно)"
+        "[WARN]: Активность охотников на холме (Сектор Б)", "[INFO]: Энергия BCU растет: +0.01",
+        "[ENV]: Температура воды стабильна (12°C)", "[INFO]: Уровень кислорода в норме",
+        "[WARN]: Низкий уровень сытости! Проверьте запасы", "[INFO]: Обнаружен заброшенный костер",
+        "[WARN]: Медведь замечен у кромки леса"
     ];
 
+    let energy = 10.5;
+    let mass = 5.2;
+
     function updateStats() {
-        document.getElementById('pwr').innerText = (Math.random() * 100).toFixed(1);
-        document.getElementById('mss').innerText = (Math.random() * 50).toFixed(1);
+        energy += (Math.random() * 0.05);
+        mass += (Math.random() * 0.02);
+        document.getElementById('pwr').innerText = energy.toFixed(1);
+        document.getElementById('mss').innerText = mass.toFixed(1);
     }
 
     function addLog() {
         const logWin = document.getElementById('log');
         const entry = logs[Math.floor(Math.random() * logs.length)];
-        logWin.innerHTML = entry + "<br>" + logWin.innerHTML.substring(0, 100);
+        logWin.innerHTML = entry + "<br>" + logWin.innerHTML.substring(0, 150);
         
         // Шанс показать тревогу
-        document.getElementById('warn').innerText = Math.random() > 0.7 ? "!! HUNTER ACTIVITY DETECTED !!" : "-- REGION CLEAR --";
-        document.getElementById('warn').style.color = document.getElementById('warn').innerText.includes("!!") ? "#ff3333" : "#33ff33";
+        const isHunter = Math.random() > 0.65;
+        const warnEl = document.getElementById('warn');
+        warnEl.innerText = isHunter ? "!! HUNTER ACTIVITY DETECTED !!" : "-- REGION STABLE --";
+        warnEl.style.color = isHunter ? "#ff3333" : "#33ff33";
     }
 
     function renderTasks() {
@@ -149,15 +177,18 @@
         if(checked > 0) {
             document.getElementById('clickSound').play();
             renderTasks();
+            addLog(); // Добавить лог сразу при синхронизации
         } else {
             document.getElementById('errorSound').play();
-            alert("Сначала выполни хотя бы одно задание, боец!");
+            alert("Протоколы не выполнены! Синхронизация невозможна.");
         }
     };
 
-    setInterval(updateStats, 3000);
-    setInterval(addLog, 5000);
+    // Обновлять статы чаще, логи реже
+    setInterval(updateStats, 2000);
+    setInterval(addLog, 7000);
     renderTasks();
+    updateStats(); // Первый запуск статов
 </script>
 
 </body>
